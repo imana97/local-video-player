@@ -15,8 +15,7 @@ app.use('/auth', authRouter);
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/local-video-player', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  
 }).then(() => {
   console.log('Connected to MongoDB');
 }).catch((err) => {
