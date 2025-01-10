@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/register', { username, password });
-      history.push('/login');
-    } catch (error) {
+      await axios.post('http://localhost:3000/auth/register', { username, password });
+      navigate('/login');
+    } catch {
       alert('User already exists');
     }
   };

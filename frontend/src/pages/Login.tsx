@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/login', { username, password });
+      const response = await axios.post('http://localhost:3000/auth/login', { username, password });
       localStorage.setItem('token', response.data.token);
-      history.push('/main');
-    } catch (error) {
+      navigate('/main');
+    } catch {
       alert('Invalid credentials');
     }
   };

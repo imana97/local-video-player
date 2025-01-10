@@ -1,48 +1,63 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate, Link } from 'react-router-dom';
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Main from './pages/Main';
+import Video from './pages/Video';
+import NotFound from './pages/NotFound';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <Navbar bg="dark" variant="dark">
-        <Container>
-          <Navbar.Brand href="/">Vite React App</Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href="/login">Login</Nav.Link>
-            <Nav.Link href="/register">Register</Nav.Link>
-          </Nav>
-        </Container>
-      </Navbar>
-      <Container>
-        <Switch>
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <PrivateRoute path="/main" component={Main} />
-          <Redirect from="/" to="/login" />
-        </Switch>
-      </Container>
+      <AppContent />
     </Router>
   );
 };
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
+const AppContent: React.FC = () => {
+  const navigate = useNavigate();
   const isAuthenticated = !!localStorage.getItem('token');
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
-    <Route
-      {...rest}
-      render={props =>
-        isAuthenticated ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to="/login" />
-        )
-      }
-    />
+    <>
+      <Navbar bg="dark" variant="dark">
+        <Container>
+          <Navbar.Brand as={Link} to="/">Vite React App</Navbar.Brand>
+          <Nav className="me-auto">
+            {!isAuthenticated && <Nav.Link as={Link} to="/login">Login</Nav.Link>}
+            {!isAuthenticated && <Nav.Link as={Link} to="/register">Register</Nav.Link>}
+          </Nav>
+          <Nav className="ms-auto">
+            {isAuthenticated && <Nav.Link onClick={handleLogout}>Logout</Nav.Link>}
+          </Nav>
+        </Container>
+      </Navbar>
+      <Container>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/main" element={<PrivateRoute component={Main} />} />
+          <Route path="/video" element={<PrivateRoute component={Video} />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Container>
+    </>
   );
+};
+
+interface PrivateRouteProps {
+  component: React.ComponentType;
+}
+
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ component: Component, ...rest }) => {
+  const isAuthenticated = !!localStorage.getItem('token');
+  return isAuthenticated ? <Component {...rest} /> : <Navigate to="/login" />;
 };
 
 export default App;

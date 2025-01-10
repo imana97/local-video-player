@@ -2,11 +2,14 @@ import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import authRouter from '../src/routes/auth';
+import { describe, it, expect } from '@jest/globals';
+import { SECRET_KEY } from '../src/config';
 
 const app = express();
-const SECRET_KEY = 'your_secret_key';
 
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(bodyParser.json());
 app.use('/auth', authRouter);
 
