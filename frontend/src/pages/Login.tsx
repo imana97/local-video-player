@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -11,7 +12,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', { username, password });
+      const response = await axios.post(`${API_URL}/auth/login`, { username, password });
       localStorage.setItem('token', response.data.token);
       navigate('/main');
     } catch {
