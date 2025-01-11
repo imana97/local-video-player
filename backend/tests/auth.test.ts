@@ -5,21 +5,23 @@ import authRoutes from '../src/routes/auth';
 import { expect, describe, it, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
 import mongoose from 'mongoose';
 import UserModel from '../src/models/User';
-import { MONGO_TEST_URL } from '../src/config';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 const app = express();
 app.use(express.json());
 app.use('/auth', authRoutes);
 
+let mongoServer: MongoMemoryServer;
+
 beforeAll(async () => {
-  await mongoose.connect(MONGO_TEST_URL, {});
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri, {});
 });
 
 afterAll(async () => {
-  if (mongoose.connection.db) {
-    await mongoose.connection.db.dropDatabase();
-  }
-  await mongoose.connection.close();
+  await mongoose.disconnect();
+  await mongoServer.stop();
 });
 
 describe('Auth Routes', () => {

@@ -9,6 +9,7 @@ import { SECRET_KEY, CORS_WHITELIST_URL, MONGO_TEST_URL } from '../src/config';
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import UserModel from '../src/models/User';
 import VideoModel from '../src/models/Video';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 const app = express();
 
@@ -37,15 +38,17 @@ const authenticateJWT = (req: AuthenticatedRequest, res: express.Response, next:
 
 app.use(authenticateJWT);
 
+let mongoServer: MongoMemoryServer;
+
 beforeAll(async () => {
-  await mongoose.connect(MONGO_TEST_URL, {});
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri, {});
 });
 
 afterAll(async () => {
-  if (mongoose.connection.db) {
-    await mongoose.connection.db.dropDatabase();
-  }
-  await mongoose.connection.close();
+  await mongoose.disconnect();
+  await mongoServer.stop();
 });
 
 describe('Video Routes', () => {
