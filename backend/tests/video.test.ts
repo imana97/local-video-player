@@ -6,10 +6,12 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import videoRouter from '../src/routes/video';
 import { SECRET_KEY, CORS_WHITELIST_URL, MONGO_TEST_URL } from '../src/config';
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
 import UserModel from '../src/models/User';
 import VideoModel from '../src/models/Video';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 
@@ -49,6 +51,18 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
+});
+
+afterEach(async () => {
+  const uploadDir = path.join(__dirname, '../uploads');
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) throw err;
+    for (const file of files) {
+      fs.unlink(path.join(uploadDir, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
 });
 
 describe('Video Routes', () => {

@@ -6,12 +6,14 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import authRouter from '../src/routes/auth';
 import videoRouter from '../src/routes/video';
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
 import { SECRET_KEY, CORS_WHITELIST_URL } from '../src/config';
 import mongoose from 'mongoose';
 import UserModel from '../src/models/User';
 import VideoModel from '../src/models/Video';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 
@@ -54,6 +56,18 @@ afterAll(async () => {
   await mongoServer.stop();
 });
 
+afterEach(async () => {
+  const uploadDir = path.join(__dirname, '../uploads');
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) throw err;
+    for (const file of files) {
+      fs.unlink(path.join(uploadDir, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
+});
+
 describe('Server', () => {
   let token: string;
   let userId: mongoose.Types.ObjectId;
@@ -90,54 +104,5 @@ describe('Server', () => {
       .set('Authorization', token);
     expect(response.status).toBe(200);
     expect(response.body.message).toBe('Welcome testuser');
-  });
-
-  it('should upload a video', async () => {
-    // Test case for uploading a video
-    const response = await request(app)
-      .post('/videos/upload')
-      .set('Authorization', token)
-      .field('name', 'Test Video')
-      .field('description', 'Test Description')
-      .field('tags', 'test')
-      .attach('video', Buffer.from('test video content'), 'test.mp4');
-    expect(response.status).toBe(201);
-    expect(response.body.message).toBe('Video uploaded successfully');
-  });
-
-  it('should get all videos uploaded by the user', async () => {
-    // Test case for retrieving all videos uploaded by the user
-    const video = new VideoModel({
-      name: 'Test Video',
-      description: 'Test Description',
-      tags: ['test'],
-      url: 'uploads/test.mp4',
-      uploadedBy: userId,
-    });
-    await video.save();
-    const response = await request(app)
-      .get('/videos/all')
-      .set('Authorization', token);
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].name).toBe('Test Video');
-  });
-
-  it('should get videos by tag uploaded by the user', async () => {
-    // Test case for retrieving videos by tag uploaded by the user
-    const video = new VideoModel({
-      name: 'Test Video',
-      description: 'Test Description',
-      tags: ['test'],
-      url: 'uploads/test.mp4',
-      uploadedBy: userId,
-    });
-    await video.save();
-    const response = await request(app)
-      .get('/videos/tag/test')
-      .set('Authorization', token);
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].name).toBe('Test Video');
   });
 });
