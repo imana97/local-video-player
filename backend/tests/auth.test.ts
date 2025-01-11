@@ -1,7 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../src/routes/auth';
-import { expect, describe, it, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { expect, describe, it, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
 import mongoose from 'mongoose';
 import UserModel from '../src/models/User';
 
