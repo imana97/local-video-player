@@ -38,13 +38,15 @@ interface AuthenticatedRequest extends Request {
 
 // Middleware to protect routes
 const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization;
+  const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
+    console.error('No token provided');
     res.sendStatus(403);
     return;
   }
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) {
+      console.error('Token verification failed', err);
       return res.sendStatus(403);
     }
     req.user = user;

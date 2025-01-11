@@ -28,7 +28,13 @@ const uploadVideoHandler: RequestHandler = async (req: AuthenticatedRequest, res
   const { name, description, tags } = req.body;
   const file = req.file;
   if (!file) {
+    console.error('No file uploaded');
     res.status(400).json({ message: 'No file uploaded' });
+    return;
+  }
+  if (!req.user) {
+    console.error('User not authenticated');
+    res.status(403).json({ message: 'User not authenticated' });
     return;
   }
   try {
@@ -42,6 +48,7 @@ const uploadVideoHandler: RequestHandler = async (req: AuthenticatedRequest, res
     await newVideo.save();
     res.status(201).json({ message: 'Video uploaded successfully', videoId: newVideo._id });
   } catch (error) {
+    console.error('Error uploading video', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -52,6 +59,7 @@ const getUserVideosHandler: RequestHandler = async (req: AuthenticatedRequest, r
     const videos = await VideoModel.find({ uploadedBy: req.user._id }).populate('uploadedBy', 'username');
     res.json(videos);
   } catch (error) {
+    console.error('Error retrieving user videos', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -63,6 +71,7 @@ const getUserVideosByTagHandler: RequestHandler = async (req: AuthenticatedReque
     const videos = await VideoModel.find({ tags: tag, uploadedBy: req.user._id }).populate('uploadedBy', 'username');
     res.json(videos);
   } catch (error) {
+    console.error('Error retrieving videos by tag', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
