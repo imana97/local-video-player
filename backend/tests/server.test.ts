@@ -43,6 +43,10 @@ const authenticateJWT = (req: AuthenticatedRequest, res: express.Response, next:
 
 app.use(authenticateJWT);
 
+app.get('/main', (req: AuthenticatedRequest, res: express.Response) => {
+  res.status(200).json({ message: `Welcome ${req.user.username}` });
+});
+
 let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
