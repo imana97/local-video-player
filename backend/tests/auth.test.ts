@@ -1,16 +1,18 @@
 import request from 'supertest';
 import express from 'express';
+import bcrypt from 'bcrypt';
 import authRoutes from '../src/routes/auth';
 import { expect, describe, it, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
 import mongoose from 'mongoose';
 import UserModel from '../src/models/User';
+import { MONGO_TEST_URL } from '../src/config';
 
 const app = express();
 app.use(express.json());
 app.use('/auth', authRoutes);
 
 beforeAll(async () => {
-  await mongoose.connect('mongodb://localhost:27017/testdb', {});
+  await mongoose.connect(MONGO_TEST_URL, {});
 });
 
 afterAll(async () => {
@@ -45,9 +47,8 @@ describe('Auth Routes', () => {
   });
 
   it('should login an existing user', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send({ username: 'testuser', password: 'testpass' });
+    const hashedPassword = await bcrypt.hash('testpass', 10);
+    await new UserModel({ username: 'testuser', password: hashedPassword }).save();
     const response = await request(app)
       .post('/auth/login')
       .send({ username: 'testuser', password: 'testpass' });

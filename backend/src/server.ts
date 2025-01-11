@@ -4,18 +4,27 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import authRouter from './routes/auth';
-import { SECRET_KEY } from './config';
+import videoRouter from './routes/video';
+import { SECRET_KEY, MONGO_URL, CORS_WHITELIST_URL, PORT } from './config';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
-const port = 3001;
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Middleware setup
+app.use(cors({ origin: CORS_WHITELIST_URL }));
 app.use(bodyParser.json());
 app.use('/auth', authRouter);
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/local-video-player', {
-  
+mongoose.connect(MONGO_URL, {
+  // ...existing code...
 }).then(() => {
   console.log('Connected to MongoDB');
 }).catch((err) => {
@@ -48,6 +57,10 @@ app.get('/main', authenticateJWT, (req: AuthenticatedRequest, res: Response) => 
   res.json({ message: `Welcome ${req.user.username}` });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+// Use video routes
+app.use('/videos', authenticateJWT, videoRouter);
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });

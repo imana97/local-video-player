@@ -1,5 +1,6 @@
 import { Router, Request, Response, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import UserModel from '../models/User';
 import { SECRET_KEY } from '../config';
 
@@ -21,7 +22,8 @@ const registerHandler: RequestHandler = async (req: AuthRequest, res: Response) 
       res.status(400).json({ message: 'User already exists' });
       return;
     }
-    const newUser = new UserModel({ username, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new UserModel({ username, password: hashedPassword });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -33,8 +35,8 @@ const registerHandler: RequestHandler = async (req: AuthRequest, res: Response) 
 const loginHandler: RequestHandler = async (req: AuthRequest, res: Response) => {
   const { username, password } = req.body;
   try {
-    const user = await UserModel.findOne({ username, password });
-    if (!user) {
+    const user = await UserModel.findOne({ username });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       res.status(401).json({ message: 'Invalid credentials' });
       return;
     }

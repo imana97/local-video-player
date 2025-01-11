@@ -17,7 +17,10 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - MONGO_URL=mongodb://mongo:27017/mydatabase
+      - SECRET_KEY=${SECRET_KEY}
+      - MONGO_URL=${MONGO_URL}
+      - CORS_WHITELIST_URL=${CORS_WHITELIST_URL}
+      - PORT=${PORT}
     depends_on:
       - mongo
     command: ["npm", "start"]
