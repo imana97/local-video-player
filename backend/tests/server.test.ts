@@ -65,11 +65,13 @@ describe('Server', () => {
   });
 
   it('should return 403 if no token is provided', async () => {
+    // Test case for handling requests without a token
     const response = await request(app).get('/main');
     expect(response.status).toBe(403);
   });
 
   it('should return 403 if token is invalid', async () => {
+    // Test case for handling requests with an invalid token
     const response = await request(app)
       .get('/main')
       .set('Authorization', 'invalid_token');
@@ -77,6 +79,7 @@ describe('Server', () => {
   });
 
   it('should return 200 and welcome message if token is valid', async () => {
+    // Test case for handling requests with a valid token
     const hashedPassword = await bcrypt.hash('testpass', 10);
     const token = jwt.sign({ username: 'testuser', password: hashedPassword }, SECRET_KEY);
     const response = await request(app)
@@ -87,6 +90,7 @@ describe('Server', () => {
   });
 
   it('should upload a video', async () => {
+    // Test case for uploading a video
     const response = await request(app)
       .post('/videos/upload')
       .set('Authorization', token)
@@ -99,6 +103,7 @@ describe('Server', () => {
   });
 
   it('should get all videos uploaded by the user', async () => {
+    // Test case for retrieving all videos uploaded by the user
     const video = new VideoModel({
       name: 'Test Video',
       description: 'Test Description',
@@ -116,6 +121,7 @@ describe('Server', () => {
   });
 
   it('should get videos by tag uploaded by the user', async () => {
+    // Test case for retrieving videos by tag uploaded by the user
     const video = new VideoModel({
       name: 'Test Video',
       description: 'Test Description',

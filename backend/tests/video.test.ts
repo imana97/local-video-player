@@ -57,11 +57,12 @@ describe('Video Routes', () => {
     await VideoModel.deleteMany({});
     const user = new UserModel({ username: 'testuser', password: 'testpass' });
     await user.save();
-    userId = user._id;
+    userId = user._id as mongoose.Types.ObjectId;
     token = jwt.sign({ _id: userId, username: 'testuser' }, SECRET_KEY);
   });
 
   it('should upload a video', async () => {
+    // Test case for uploading a video
     const response = await request(app)
       .post('/videos/upload')
       .set('Authorization', token)
@@ -74,6 +75,7 @@ describe('Video Routes', () => {
   });
 
   it('should get all videos uploaded by the user', async () => {
+    // Test case for retrieving all videos uploaded by the user
     const video = new VideoModel({
       name: 'Test Video',
       description: 'Test Description',
@@ -91,6 +93,7 @@ describe('Video Routes', () => {
   });
 
   it('should get videos by tag uploaded by the user', async () => {
+    // Test case for retrieving videos by tag uploaded by the user
     const video = new VideoModel({
       name: 'Test Video',
       description: 'Test Description',
