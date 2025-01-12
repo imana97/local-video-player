@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import VideoModel from '../models/Video';
 import { AuthenticatedRequest } from '../types';
 import path from 'path';
+import { getUserByUsername } from '../middleware/get-user-by-username';
 
 const router = Router();
 
@@ -41,9 +42,9 @@ const uploadVideoHandler: RequestHandler = async (req: AuthenticatedRequest, res
     const newVideo = new VideoModel({
       name,
       description,
-      tags,
+      tags:JSON.parse(tags),
       url: file.path,
-      uploadedBy: req.user._id,
+      uploadedBy: await getUserByUsername(req.user.username),
     });
     await newVideo.save();
     res.status(201).json({ message: 'Video uploaded successfully', videoId: newVideo._id });
@@ -56,7 +57,7 @@ const uploadVideoHandler: RequestHandler = async (req: AuthenticatedRequest, res
 // Get all videos uploaded by the user
 const getUserVideosHandler: RequestHandler = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const videos = await VideoModel.find({ uploadedBy: req.user._id }).populate('uploadedBy', 'username');
+    const videos = await VideoModel.find({ uploadedBy: await getUserByUsername(req.user.username) }).populate('uploadedBy', 'username');
     res.json(videos);
   } catch (error) {
     console.error('Error retrieving user videos', error);

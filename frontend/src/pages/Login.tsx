@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
-import axios from 'axios';
-import { API_URL } from '../config';
+import { login } from '../api-client';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -12,9 +11,12 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { username, password });
-      localStorage.setItem('token', response.data.token);
-      navigate('/main');
+      const data = await login(username, password);
+      if (data.token) {
+        navigate('/main');
+      } else {
+        alert('Invalid credentials');
+      }
     } catch {
       alert('Invalid credentials');
     }

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
-import axios from 'axios';
-import { API_URL } from '../config';
+import { register } from '../api-client';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -12,10 +11,14 @@ const Register: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/auth/register`, { username, password });
-      navigate('/login');
+      const data = await register(username, password);
+      if (data.token) {
+        navigate('/main');
+      } else {
+        alert('Registration failed');
+      }
     } catch {
-      alert('User already exists');
+      alert('Registration failed');
     }
   };
 
